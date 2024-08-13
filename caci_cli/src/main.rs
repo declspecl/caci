@@ -11,39 +11,39 @@ fn main() -> CaciResult<()> {
     let args = CaciCli::parse();
 
     match args.command {
-        CaciCommands::Init(init_args) => {
+        CaciCommands::Init { project_name, template } => {
             println!("INIT");
 
-            let caci_fs_agent: Box<dyn CaciFilesystemAgent> = match init_args.template {
+            let caci_fs_agent: Box<dyn CaciFilesystemAgent> = match template {
                 Some(template) => {
                     match template {
-                        CaciTemplate::Git => Box::new(GitCaciFilesystemAgent::new(PathBuf::from(init_args.project_name)))
+                        CaciTemplate::Git => Box::new(GitCaciFilesystemAgent::new(PathBuf::from(project_name)))
                     }
                 },
                 None => {
-                    Box::new(NopCaciFilesystemAgent::new(PathBuf::from(init_args.project_name)))
+                    Box::new(NopCaciFilesystemAgent::new(PathBuf::from(project_name)))
                 }
             };
 
             caci_fs_agent.initalize_caci()?;
         },
-        CaciCommands::New(new_args) => {
+        CaciCommands::New { project_name, template } => {
             println!("NEW");
 
-            let caci_fs_agent: Box<dyn CaciFilesystemAgent> = match new_args.template {
+            let caci_fs_agent: Box<dyn CaciFilesystemAgent> = match template {
                 Some(template) => {
                     match template {
-                        CaciTemplate::Git => Box::new(GitCaciFilesystemAgent::new(PathBuf::from(new_args.project_name)))
+                        CaciTemplate::Git => Box::new(GitCaciFilesystemAgent::new(PathBuf::from(project_name)))
                     }
                 },
                 None => {
-                    Box::new(NopCaciFilesystemAgent::new(PathBuf::from(new_args.project_name)))
+                    Box::new(NopCaciFilesystemAgent::new(PathBuf::from(project_name)))
                 }
             };
 
             caci_fs_agent.initalize_caci()?;
         },
-        CaciCommands::Run(_run_args) => {
+        CaciCommands::Run { } => {
             println!("run");
         }
     }
