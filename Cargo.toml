@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+members = [
+    "caci_cli",
+    "caci_core",
+    "caci_fs"
+]
+
+[workspace.package]
+
+[workspace.metadata]
+
+[workspace.dependencies]
