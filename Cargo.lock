@@ -78,6 +78,9 @@ dependencies = [
 [[package]]
 name = "caci_fs"
 version = "0.0.0"
+dependencies = [
+ "caci_core",
+]
 
 [[package]]
 name = "clap"

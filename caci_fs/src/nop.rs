@@ -4,23 +4,23 @@ use caci_core::CaciResult;
 
 use crate::CaciFilesystemAgent;
 
-pub struct GitCaciFilesystemAgent {
+pub struct NopCaciFilesystemAgent {
     repo_base_directory: PathBuf
 }
 
-impl GitCaciFilesystemAgent {
+impl NopCaciFilesystemAgent {
     pub fn new(repo_base_directory: PathBuf) -> Self {
         return Self { repo_base_directory };
     }
 }
 
-impl CaciFilesystemAgent for GitCaciFilesystemAgent {
+impl CaciFilesystemAgent for NopCaciFilesystemAgent {
     fn get_repo_base_directory(&self) -> &Path {
         return &self.repo_base_directory;
     }
 
     fn get_repo_vcs_directory(&self) -> PathBuf {
-        return self.repo_base_directory.join(".git");
+        return self.get_repo_base_directory().to_owned();
     }
 
     fn get_repo_vcs_hooks_directory(&self) -> PathBuf {
