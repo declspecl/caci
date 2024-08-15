@@ -1,0 +1,7 @@
+vcs_agent = "git"
+
+[[hooks]]
+name = "test"
+command = "cargo test"
+stage = "pre_commit"
+output = "stdout"
