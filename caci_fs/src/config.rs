@@ -62,6 +62,20 @@ pub struct CaciConfig {
 }
 
 impl CaciConfig {
+    pub fn new(agent: CaciFilesystemAgent) -> CaciConfig {
+        return CaciConfig {
+            agent,
+            hooks: Vec::with_capacity(5)
+        };
+    }
+
+    pub fn with_hooks(agent: CaciFilesystemAgent, hooks: Vec<CaciHookStage>) -> CaciConfig {
+        return CaciConfig {
+            agent,
+            hooks
+        };
+    }
+
     pub fn try_serialize(&self) -> CaciResult<String> {
         return Ok(toml_edit::ser::to_string_pretty(self)?);
     }
