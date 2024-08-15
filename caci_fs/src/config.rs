@@ -70,10 +70,7 @@ impl CaciConfig {
     }
 
     pub fn with_hooks(vcs_agent: CaciVcsAgent, hooks: Vec<CaciHook>) -> CaciConfig {
-        return CaciConfig {
-            vcs_agent,
-            hooks
-        };
+        return CaciConfig { vcs_agent, hooks };
     }
 
     pub fn try_serialize(&self) -> CaciResult<String> {

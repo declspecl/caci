@@ -16,9 +16,7 @@ pub enum CaciVcsAgent {
 #[derive(Debug, Subcommand)]
 pub enum CaciCommands {
     /// Initialize CACI in the current directory
-    Init {
-        agent: CaciVcsAgent
-    },
+    Init { agent: CaciVcsAgent },
     /// Initialize CACI and the chosen VCS agent in a new directory
     New {
         agent: CaciVcsAgent,

@@ -3,5 +3,11 @@ vcs_agent = "git"
 [[hooks]]
 name = "test"
 command = "cargo test"
+stage = "pre_push"
+output = "stdout"
+
+[[hooks]]
+name = "format"
+command = "cargo fmt"
 stage = "pre_commit"
 output = "stdout"

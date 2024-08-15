@@ -7,7 +7,7 @@ pub enum CaciError {
     TOMLDeserializationError(#[from] toml_edit::de::Error),
 
     #[error("TOMLSerializationError: {0}")]
-    TOMLSerializationError(#[from] toml_edit::ser::Error),
+    TOMLSerializationError(#[from] toml_edit::ser::Error)
 }
 
 pub type CaciResult<T> = anyhow::Result<T, CaciError>;

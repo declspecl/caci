@@ -1,4 +1,7 @@
-use std::{path::{Path, PathBuf}, process::Command};
+use std::{
+    path::{Path, PathBuf},
+    process::Command
+};
 
 use caci_core::CaciResult;
 
@@ -14,7 +17,11 @@ impl GitCaciFilesystemAgent {
     pub fn new(repo_base_directory: PathBuf, caci_config: CaciConfig) -> Self {
         let repo_agent_directory = repo_base_directory.join(".git");
 
-        return Self { repo_base_directory, repo_agent_directory, caci_config };
+        return Self {
+            repo_base_directory,
+            repo_agent_directory,
+            caci_config
+        };
     }
 }
 
