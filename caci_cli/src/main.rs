@@ -32,7 +32,10 @@ fn main() -> CaciResult<()> {
             }
         },
         _ => {
-            CaciConfig::try_deserialize(&fs::read_to_string("caci.toml")?)?
+            match CaciConfig::try_deserialize(&fs::read_to_string("caci.toml")?) {
+                Ok(config) => config,
+                Err(_) => CaciConfig::default()
+            }
         }
     };
 
