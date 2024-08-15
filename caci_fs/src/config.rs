@@ -84,3 +84,9 @@ impl CaciConfig {
         return Ok(toml_edit::de::from_str(config_content)?);
     }
 }
+
+impl Default for CaciConfig {
+    fn default() -> Self {
+        return Self::new(CaciVcsAgent::Native);
+    }
+}
