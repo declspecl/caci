@@ -138,6 +138,9 @@ fn main() -> CaciResult<()> {
                 },
                 cli::CaciHookCommands::Remove { name: _ } => {
                     unimplemented!();
+                },
+                cli::CaciHookCommands::Run { name: _ } => {
+                    unimplemented!();
                 }
             }
         }

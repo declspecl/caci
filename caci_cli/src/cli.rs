@@ -43,6 +43,11 @@ pub enum CaciHookCommands {
     Remove {
         #[arg(short, long, value_name = "NAME")]
         name: String
+    },
+    /// Executes an arbitrary hook by name
+    Run {
+        #[arg(short, long, value_name = "NAME")]
+        name: String
     }
 }
 
