@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum CaciFilesystemAgent {
-    Nop,
+pub enum CaciVcsAgent {
+    Native,
     Git
 }
 
@@ -57,21 +57,21 @@ pub enum CaciHook {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct CaciConfig {
-    pub agent: CaciFilesystemAgent,
+    pub vcs_agent: CaciVcsAgent,
     pub hooks: Vec<CaciHookStage>
 }
 
 impl CaciConfig {
-    pub fn new(agent: CaciFilesystemAgent) -> CaciConfig {
+    pub fn new(vcs_agent: CaciVcsAgent) -> CaciConfig {
         return CaciConfig {
-            agent,
+            vcs_agent,
             hooks: Vec::with_capacity(5)
         };
     }
 
-    pub fn with_hooks(agent: CaciFilesystemAgent, hooks: Vec<CaciHookStage>) -> CaciConfig {
+    pub fn with_hooks(vcs_agent: CaciVcsAgent, hooks: Vec<CaciHookStage>) -> CaciConfig {
         return CaciConfig {
-            agent,
+            vcs_agent,
             hooks
         };
     }

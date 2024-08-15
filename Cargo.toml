@@ -9,5 +9,3 @@ members = [
 [workspace.package]
 
 [workspace.metadata]
-
-[workspace.dependencies]
