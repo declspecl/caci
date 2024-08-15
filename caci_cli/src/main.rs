@@ -49,6 +49,8 @@ fn main() -> CaciResult<()> {
                     cli::CaciVcsAgent::Native => Box::new(NativeCaciFilesystemAgent::new(repo_base_directory, caci_config))
                 }
             };
+
+            caci_fs_agent.initalize_caci()?;
         },
         CaciCommands::Init { agent } => {
             let caci_fs_agent: Box<dyn CaciFilesystemAgent> = {
@@ -59,6 +61,8 @@ fn main() -> CaciResult<()> {
                     cli::CaciVcsAgent::Native => Box::new(NativeCaciFilesystemAgent::new(repo_base_directory, caci_config))
                 }
             };
+
+            caci_fs_agent.initalize_caci()?;
         },
         CaciCommands::Clean => {
             unimplemented!();

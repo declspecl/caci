@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::{fs, path::{Path, PathBuf}};
 
 use caci_core::CaciResult;
 
@@ -44,6 +44,8 @@ impl CaciFilesystemAgent for NativeCaciFilesystemAgent {
     }
 
     fn initalize_caci(&self) -> CaciResult<()> {
-        unimplemented!();
+        fs::write(&self.get_repo_base_directory().join("caci.toml"), self.get_caci_config().try_serialize()?.as_bytes())?;
+
+        return Ok(());
     }
 }
