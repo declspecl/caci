@@ -15,9 +15,9 @@ pub enum CaciVcsAgent {
 
 #[derive(Debug, Subcommand)]
 pub enum CaciCommands {
-    /// Initialize CACI in the current directory
+    /// Initialize caci in the current directory
     Init { agent: CaciVcsAgent },
-    /// Initialize CACI and the chosen VCS agent in a new directory
+    /// Initialize caci and the chosen VCS agent in a new directory
     New {
         agent: CaciVcsAgent,
         #[arg(short, long, value_name = "PROJECT_NAME")]
@@ -27,7 +27,7 @@ pub enum CaciCommands {
     Clean,
     /// (Over)Write the hooks defined in caci.toml
     Write,
-    /// Manage CACI hooks and their configurations
+    /// Manage caci hooks and their configurations
     #[command(subcommand)]
     Hook(CaciHookCommands)
 }
