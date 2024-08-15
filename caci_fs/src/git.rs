@@ -1,4 +1,4 @@
-use std::{fs, path::{Path, PathBuf}};
+use std::{path::{Path, PathBuf}, process::Command};
 
 use caci_core::CaciResult;
 
@@ -23,6 +23,10 @@ impl CaciFilesystemAgent for GitCaciFilesystemAgent {
         return &self.caci_config;
     }
 
+    fn get_mut_caci_config(&mut self) -> &mut CaciConfig {
+        return &mut self.caci_config;
+    }
+
     fn get_repo_base_directory(&self) -> &Path {
         return &self.repo_base_directory;
     }
@@ -39,8 +43,12 @@ impl CaciFilesystemAgent for GitCaciFilesystemAgent {
         unimplemented!();
     }
 
-    fn initalize_caci(&self) -> CaciResult<()> {
-        fs::write(&self.get_repo_base_directory().join("caci.toml"), self.get_caci_config().try_serialize()?.as_bytes())?;
+    fn initalize(&self) -> CaciResult<()> {
+        self.write_config()?;
+        Command::new("git")
+            .arg("init")
+            .arg(self.get_repo_base_directory())
+            .output()?;
 
         return Ok(());
     }

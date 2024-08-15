@@ -29,7 +29,7 @@ pub enum CaciHookStage {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct CaciLocalHook {
-    pub name: Option<String>,
+    pub name: String,
     pub description: Option<String>,
     pub command: String,
     pub stage: CaciHookStage,
@@ -39,7 +39,7 @@ pub struct CaciLocalHook {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct CaciRemoteHook {
-    pub name: Option<String>,
+    pub name: String,
     pub description: Option<String>,
     pub hook_url: String,
     pub hook_executor: String,
@@ -58,7 +58,7 @@ pub enum CaciHook {
 #[serde(rename_all = "snake_case")]
 pub struct CaciConfig {
     pub vcs_agent: CaciVcsAgent,
-    pub hooks: Vec<CaciHookStage>
+    pub hooks: Vec<CaciHook>
 }
 
 impl CaciConfig {
@@ -69,7 +69,7 @@ impl CaciConfig {
         };
     }
 
-    pub fn with_hooks(vcs_agent: CaciVcsAgent, hooks: Vec<CaciHookStage>) -> CaciConfig {
+    pub fn with_hooks(vcs_agent: CaciVcsAgent, hooks: Vec<CaciHook>) -> CaciConfig {
         return CaciConfig {
             vcs_agent,
             hooks

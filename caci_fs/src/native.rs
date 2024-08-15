@@ -27,6 +27,10 @@ impl CaciFilesystemAgent for NativeCaciFilesystemAgent {
         return &self.caci_config;
     }
 
+    fn get_mut_caci_config(&mut self) -> &mut CaciConfig {
+        return &mut self.caci_config;
+    }
+
     fn get_repo_base_directory(&self) -> &Path {
         return &self.repo_base_directory;
     }
@@ -43,8 +47,9 @@ impl CaciFilesystemAgent for NativeCaciFilesystemAgent {
         unimplemented!();
     }
 
-    fn initalize_caci(&self) -> CaciResult<()> {
-        fs::write(&self.get_repo_base_directory().join("caci.toml"), self.get_caci_config().try_serialize()?.as_bytes())?;
+    fn initalize(&self) -> CaciResult<()> {
+        self.write_config()?;
+        fs::create_dir_all(self.get_repo_agent_hooks_directory())?;
 
         return Ok(());
     }
