@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 caci_core = { version = "0.0.0", path = "../caci_core" }
+serde = { version = "1.0.207", features = ["derive"] }
+toml_edit = { version = "0.22.20", features = ["serde"] }
