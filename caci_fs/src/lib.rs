@@ -38,4 +38,17 @@ pub trait FilesystemController {
 
         return Ok(());
     }
+
+    fn clean_hooks(&self) -> CaciResult<()> {
+        fs::remove_dir_all(self.repo_vcs_hooks_directory().as_path())?;
+        fs::create_dir_all(self.repo_vcs_hooks_directory().as_path())?;
+
+        return Ok(());
+    }
+    fn clean_scripts(&self) -> CaciResult<()> {
+        fs::remove_dir_all(self.caci_scripts_directory().as_path())?;
+        fs::create_dir_all(self.caci_scripts_directory().as_path())?;
+
+        return Ok(());
+    }
 }

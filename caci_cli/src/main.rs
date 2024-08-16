@@ -88,7 +88,8 @@ fn main() -> CaciResult<()> {
             caci_fs_agent.initalize()?;
         },
         CliCommands::Clean => {
-            unimplemented!();
+            caci_fs_agent.clean_hooks()?;
+            caci_fs_agent.clean_scripts()?;
         },
         CliCommands::Write => {
             unimplemented!();
