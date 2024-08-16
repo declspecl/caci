@@ -29,8 +29,15 @@ pub trait FilesystemController {
 
         return Ok(());
     }
+    fn initialize_caci(&self) -> CaciResult<()> {
+        fs::create_dir_all(self.caci_directory().as_path())?;
+        fs::create_dir_all(self.caci_scripts_directory().as_path())?;
+
+        return Ok(());
+    }
     fn initialize_vcs(&self) -> CaciResult<()>;
     fn initalize(&self) -> CaciResult<()> {
+        self.initialize_caci()?;
         self.initialize_vcs()?;
         self.write_config()?;
         self.write_hooks()?;
