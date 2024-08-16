@@ -1,57 +1,50 @@
 use std::{fs, path::PathBuf};
 
-use caci_core::CaciResult;
+use caci_core::{
+    model::{CaciConfig, Hook, HookOutput, HookStage, LocalHook, RemoteHook, VcsAgent},
+    CaciResult
+};
 use caci_fs::{
-    config::{CaciConfig, CaciHook, CaciLocalHook, CaciRemoteHook},
-    git::GitCaciFilesystemAgent,
-    native::NativeCaciFilesystemAgent,
-    CaciFilesystemAgent
+    git::GitFilesystemController, native::NativeFilesystemController, FilesystemController
 };
 use clap::Parser;
-use cli::{CaciCli, CaciCommands};
+use cli::{CaciCli, CliCommands, CliHookAddCommands, CliHookCommands, CliVcsAgent};
 
 pub mod cli;
 
 fn main() -> CaciResult<()> {
     let args = CaciCli::parse();
 
-    let mut caci_fs_agent: Box<dyn CaciFilesystemAgent> = match &args.command {
-        CaciCommands::New {
+    let mut caci_fs_agent: Box<dyn FilesystemController> = match &args.command {
+        CliCommands::New {
             project_name,
             agent
         } => {
-            let caci_config = match agent {
-                cli::CaciVcsAgent::Git => CaciConfig::new(caci_fs::config::CaciVcsAgent::Git),
-                cli::CaciVcsAgent::Native => CaciConfig::new(caci_fs::config::CaciVcsAgent::Native)
-            };
+            let caci_config = CaciConfig::new(agent.clone().into());
 
             let repo_base_directory = PathBuf::from(project_name);
 
             match agent {
-                cli::CaciVcsAgent::Git => Box::new(GitCaciFilesystemAgent::new(
+                CliVcsAgent::Git => Box::new(GitFilesystemController::new(
                     repo_base_directory,
                     caci_config
                 )),
-                cli::CaciVcsAgent::Native => Box::new(NativeCaciFilesystemAgent::new(
+                CliVcsAgent::Native => Box::new(NativeFilesystemController::new(
                     repo_base_directory,
                     caci_config
                 ))
             }
         },
-        CaciCommands::Init { agent } => {
-            let caci_config = match agent {
-                cli::CaciVcsAgent::Git => CaciConfig::new(caci_fs::config::CaciVcsAgent::Git),
-                cli::CaciVcsAgent::Native => CaciConfig::new(caci_fs::config::CaciVcsAgent::Native)
-            };
-
+        CliCommands::Init { agent } => {
+            let caci_config = CaciConfig::new(agent.clone().into());
             let repo_base_directory = PathBuf::new();
 
             match agent {
-                cli::CaciVcsAgent::Git => Box::new(GitCaciFilesystemAgent::new(
+                CliVcsAgent::Git => Box::new(GitFilesystemController::new(
                     repo_base_directory,
                     caci_config
                 )),
-                cli::CaciVcsAgent::Native => Box::new(NativeCaciFilesystemAgent::new(
+                CliVcsAgent::Native => Box::new(NativeFilesystemController::new(
                     repo_base_directory,
                     caci_config
                 ))
@@ -64,18 +57,18 @@ fn main() -> CaciResult<()> {
             };
 
             match caci_config.vcs_agent {
-                caci_fs::config::CaciVcsAgent::Git => {
+                VcsAgent::Git => {
                     let repo_base_directory = PathBuf::from(".");
 
-                    Box::new(GitCaciFilesystemAgent::new(
+                    Box::new(GitFilesystemController::new(
                         repo_base_directory,
                         caci_config
                     ))
                 },
-                caci_fs::config::CaciVcsAgent::Native => {
+                VcsAgent::Native => {
                     let repo_base_directory = PathBuf::from(".");
 
-                    Box::new(NativeCaciFilesystemAgent::new(
+                    Box::new(NativeFilesystemController::new(
                         repo_base_directory,
                         caci_config
                     ))
@@ -85,66 +78,41 @@ fn main() -> CaciResult<()> {
     };
 
     match args.command {
-        CaciCommands::New {
+        CliCommands::New {
             project_name: _,
             agent: _
         } => {
             caci_fs_agent.initalize()?;
         },
-        CaciCommands::Init { agent: _ } => {
+        CliCommands::Init { agent: _ } => {
             caci_fs_agent.initalize()?;
         },
-        CaciCommands::Clean => {
+        CliCommands::Clean => {
             unimplemented!();
         },
-        CaciCommands::Write => {
+        CliCommands::Write => {
             unimplemented!();
         },
-        CaciCommands::Hook(hook_command) => match hook_command {
-            cli::CaciHookCommands::Add(hook_add_command) => match hook_add_command {
-                cli::CaciHookAddCommands::Local {
+        CliCommands::Hook(hook_command) => match hook_command {
+            CliHookCommands::Add(hook_add_command) => match hook_add_command {
+                CliHookAddCommands::Local {
                     name,
                     description,
                     command,
                     stage,
                     output
                 } => {
-                    let stage = match stage {
-                        cli::CaciHookStage::PreCommit => caci_fs::config::CaciHookStage::PreCommit,
-                        cli::CaciHookStage::PrepareCommitMsg => {
-                            caci_fs::config::CaciHookStage::PrepareCommitMsg
-                        },
-                        cli::CaciHookStage::CommitMsg => caci_fs::config::CaciHookStage::CommitMsg,
-                        cli::CaciHookStage::PostCommit => {
-                            caci_fs::config::CaciHookStage::PostCommit
-                        },
-                        cli::CaciHookStage::PrePush => caci_fs::config::CaciHookStage::PrePush
-                    };
+                    let stage: HookStage = stage.into();
+                    let output: HookOutput = output.into();
 
-                    let output = match output {
-                        cli::CaciHookOutput::Stdout => {
-                            Some(caci_fs::config::CaciHookOutput::Stdout)
-                        },
-                        cli::CaciHookOutput::Commit => {
-                            Some(caci_fs::config::CaciHookOutput::Commit)
-                        },
-                        cli::CaciHookOutput::Silent => Some(caci_fs::config::CaciHookOutput::Silent)
-                    };
-
-                    let new_hook = CaciLocalHook {
-                        name,
-                        description,
-                        command,
-                        stage,
-                        output
-                    };
+                    let new_hook = LocalHook::new(name, description, command, stage, output);
 
                     caci_fs_agent
-                        .get_mut_caci_config()
+                        .get_mut_config()
                         .hooks
-                        .push(CaciHook::LocalHook(new_hook));
+                        .push(Hook::LocalHook(new_hook));
                 },
-                cli::CaciHookAddCommands::Remote {
+                CliHookAddCommands::Remote {
                     name,
                     description,
                     hook_url,
@@ -152,47 +120,22 @@ fn main() -> CaciResult<()> {
                     stage,
                     output
                 } => {
-                    let stage = match stage {
-                        cli::CaciHookStage::PreCommit => caci_fs::config::CaciHookStage::PreCommit,
-                        cli::CaciHookStage::PrepareCommitMsg => {
-                            caci_fs::config::CaciHookStage::PrepareCommitMsg
-                        },
-                        cli::CaciHookStage::CommitMsg => caci_fs::config::CaciHookStage::CommitMsg,
-                        cli::CaciHookStage::PostCommit => {
-                            caci_fs::config::CaciHookStage::PostCommit
-                        },
-                        cli::CaciHookStage::PrePush => caci_fs::config::CaciHookStage::PrePush
-                    };
+                    let stage: HookStage = stage.into();
+                    let output: HookOutput = output.into();
 
-                    let output = match output {
-                        cli::CaciHookOutput::Stdout => {
-                            Some(caci_fs::config::CaciHookOutput::Stdout)
-                        },
-                        cli::CaciHookOutput::Commit => {
-                            Some(caci_fs::config::CaciHookOutput::Commit)
-                        },
-                        cli::CaciHookOutput::Silent => Some(caci_fs::config::CaciHookOutput::Silent)
-                    };
-
-                    let new_hook = CaciRemoteHook {
-                        name,
-                        description,
-                        hook_url,
-                        hook_executor,
-                        stage,
-                        output
-                    };
+                    let new_hook =
+                        RemoteHook::new(name, description, hook_url, hook_executor, stage, output);
 
                     caci_fs_agent
-                        .get_mut_caci_config()
+                        .get_mut_config()
                         .hooks
-                        .push(CaciHook::RemoteHook(new_hook));
+                        .push(Hook::RemoteHook(new_hook));
                 }
             },
-            cli::CaciHookCommands::Remove { name: _ } => {
+            CliHookCommands::Remove { name: _ } => {
                 unimplemented!();
             },
-            cli::CaciHookCommands::Run { name: _ } => {
+            CliHookCommands::Run { name: _ } => {
                 unimplemented!();
             }
         }

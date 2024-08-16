@@ -1,34 +1,40 @@
-pub mod config;
 pub mod git;
 pub mod native;
 
-use std::{
-    fs,
-    path::{Path, PathBuf}
-};
+use std::{fs, path::PathBuf};
 
-use caci_core::CaciResult;
-use config::CaciConfig;
+use caci_core::{model::CaciConfig, CaciResult};
 
-pub trait CaciFilesystemAgent {
-    // (expected) implementer members getters
-    fn get_caci_config(&self) -> &CaciConfig;
-    fn get_mut_caci_config(&mut self) -> &mut CaciConfig;
-    fn get_repo_base_directory(&self) -> &Path;
-    fn get_repo_agent_directory(&self) -> &Path;
+pub trait FilesystemController {
+    fn get_config(&self) -> &CaciConfig;
+    fn get_mut_config(&mut self) -> &mut CaciConfig;
 
-    // implementer misc getters
-    fn get_repo_agent_hooks_directory(&self) -> PathBuf;
+    fn repo_base_directory(&self) -> PathBuf;
+    fn repo_vcs_directory(&self) -> PathBuf;
+    fn repo_vcs_hooks_directory(&self) -> PathBuf;
+    fn caci_directory(&self) -> PathBuf {
+        return self.repo_base_directory().join(".caci");
+    }
+    fn caci_scripts_directory(&self) -> PathBuf {
+        return self.caci_directory().join("scripts");
+    }
 
-    // implementer filesystem operations
+    fn write_scripts(&self) -> CaciResult<()>;
     fn write_hooks(&self) -> CaciResult<()>;
-    fn initalize(&self) -> CaciResult<()>;
-
     fn write_config(&self) -> CaciResult<()> {
         fs::write(
-            &self.get_repo_base_directory().join("caci.toml"),
-            self.get_caci_config().try_serialize()?.as_bytes()
+            self.repo_base_directory().join("caci.toml").as_path(),
+            self.get_config().try_serialize()?.as_bytes()
         )?;
+
+        return Ok(());
+    }
+    fn initialize_vcs(&self) -> CaciResult<()>;
+    fn initalize(&self) -> CaciResult<()> {
+        self.initialize_vcs()?;
+        self.write_config()?;
+        self.write_hooks()?;
+        self.write_scripts()?;
 
         return Ok(());
     }
