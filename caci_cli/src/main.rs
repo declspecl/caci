@@ -15,12 +15,12 @@ pub mod cli;
 fn main() -> CaciResult<()> {
     let args = CaciCli::parse();
 
-    let mut caci_fs_agent: Box<dyn FilesystemController> = match &args.command {
+    let mut caci_fs_controller: Box<dyn FilesystemController> = match &args.command {
         CliCommands::New {
             project_name,
             agent
         } => {
-            let caci_config = CaciConfig::new(agent.clone().into());
+            let caci_config = CaciConfig::from_vcs_agent(agent.clone().into());
 
             let repo_base_directory = PathBuf::from(project_name);
 
@@ -36,7 +36,7 @@ fn main() -> CaciResult<()> {
             }
         },
         CliCommands::Init { agent } => {
-            let caci_config = CaciConfig::new(agent.clone().into());
+            let caci_config = CaciConfig::from_vcs_agent(agent.clone().into());
             let repo_base_directory = PathBuf::new();
 
             match agent {
@@ -82,14 +82,14 @@ fn main() -> CaciResult<()> {
             project_name: _,
             agent: _
         } => {
-            caci_fs_agent.initalize()?;
+            caci_fs_controller.initalize()?;
         },
         CliCommands::Init { agent: _ } => {
-            caci_fs_agent.initalize()?;
+            caci_fs_controller.initalize()?;
         },
         CliCommands::Clean => {
-            caci_fs_agent.clean_hooks()?;
-            caci_fs_agent.clean_scripts()?;
+            caci_fs_controller.clean_hooks()?;
+            caci_fs_controller.clean_scripts()?;
         },
         CliCommands::Write => {
             unimplemented!();
@@ -108,7 +108,7 @@ fn main() -> CaciResult<()> {
 
                     let new_hook = LocalHook::new(name, description, command, stage, output);
 
-                    caci_fs_agent
+                    caci_fs_controller
                         .get_mut_config()
                         .hooks
                         .push(Hook::LocalHook(new_hook));
@@ -127,7 +127,7 @@ fn main() -> CaciResult<()> {
                     let new_hook =
                         RemoteHook::new(name, description, hook_url, hook_executor, stage, output);
 
-                    caci_fs_agent
+                    caci_fs_controller
                         .get_mut_config()
                         .hooks
                         .push(Hook::RemoteHook(new_hook));
@@ -142,7 +142,7 @@ fn main() -> CaciResult<()> {
         }
     }
 
-    caci_fs_agent.write_config()?;
+    caci_fs_controller.write_config()?;
 
     return Ok(());
 }

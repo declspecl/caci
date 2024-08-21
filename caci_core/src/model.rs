@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use serde::{Deserialize, Serialize};
 
 use crate::CaciResult;
@@ -97,19 +99,36 @@ pub enum Hook {
 #[serde(rename_all = "kebab-case")]
 pub struct CaciConfig {
     pub vcs_agent: VcsAgent,
+    pub script_paths: Vec<PathBuf>,
     pub hooks: Vec<Hook>
 }
 
 impl CaciConfig {
-    pub fn new(vcs_agent: VcsAgent) -> CaciConfig {
+    pub fn new(vcs_agent: VcsAgent, script_paths: Vec<PathBuf>) -> CaciConfig {
         return CaciConfig {
             vcs_agent,
-            hooks: Vec::with_capacity(5)
+            script_paths,
+            hooks: Vec::new()
         };
     }
 
-    pub fn with_hooks(vcs_agent: VcsAgent, hooks: Vec<Hook>) -> CaciConfig {
-        return CaciConfig { vcs_agent, hooks };
+    pub fn from_vcs_agent(vcs_agent: VcsAgent) -> CaciConfig {
+        return CaciConfig {
+            vcs_agent,
+            ..CaciConfig::default()
+        };
+    }
+
+    pub fn with_hooks(
+        vcs_agent: VcsAgent,
+        script_paths: Vec<PathBuf>,
+        hooks: Vec<Hook>
+    ) -> CaciConfig {
+        return CaciConfig {
+            vcs_agent,
+            script_paths,
+            hooks
+        };
     }
 
     pub fn try_serialize(&self) -> CaciResult<String> {
@@ -123,6 +142,6 @@ impl CaciConfig {
 
 impl Default for CaciConfig {
     fn default() -> Self {
-        return Self::new(VcsAgent::Native);
+        return Self::new(VcsAgent::Native, vec![PathBuf::from("./caci/scripts")]);
     }
 }
