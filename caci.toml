@@ -1,13 +1,3 @@
 vcs-agent = "git"
-
-[[hooks]]
-name = "test"
-command = "cargo test"
-stage = "pre-push"
-output = "stdout"
-
-[[hooks]]
-name = "format"
-command = "cargo fmt"
-stage = "pre-commit"
-output = "stdout"
+script-paths = [".caci/scripts"]
+hooks = []

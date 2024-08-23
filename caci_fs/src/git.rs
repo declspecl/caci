@@ -42,10 +42,6 @@ impl FilesystemController for GitFilesystemController {
         return self.repo_vcs_directory().join("hooks");
     }
 
-    fn write_hooks(&self) -> CaciResult<()> {
-        unimplemented!();
-    }
-
     fn write_config(&self) -> CaciResult<()> {
         fs::write(
             self.repo_base_directory().join("caci.toml").as_path(),
