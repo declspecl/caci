@@ -1,0 +1,2 @@
+echo "RUNNING FORMATTING"
+cargo fmt

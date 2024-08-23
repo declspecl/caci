@@ -1,0 +1,2 @@
+echo "RUNNING TESTS"
+cargo test
