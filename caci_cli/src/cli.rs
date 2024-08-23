@@ -83,7 +83,7 @@ impl Into<HookStage> for CliHookStage {
 #[derive(Debug, Clone, Copy, ValueEnum)]
 pub enum CliHookOutput {
     Stdout,
-    Commit,
+    CommitMsg,
     Silent
 }
 
@@ -91,7 +91,7 @@ impl Into<HookOutput> for CliHookOutput {
     fn into(self) -> HookOutput {
         return match self {
             CliHookOutput::Stdout => HookOutput::Stdout,
-            CliHookOutput::Commit => HookOutput::CommitMsg,
+            CliHookOutput::CommitMsg => HookOutput::CommitMsg,
             CliHookOutput::Silent => HookOutput::Silent
         };
     }
@@ -105,7 +105,7 @@ pub enum CliHookAddCommands {
         name: String,
         #[arg(short, long, value_name = "DESCRIPTION")]
         description: Option<String>,
-        #[arg(short, long, value_name = "SCRIPT_FILENAME")]
+        #[arg(short = 'f', long, value_name = "FILENAME")]
         script_filename: String,
         #[arg(short, long, value_name = "EXECUTOR")]
         executor: String,
@@ -120,9 +120,9 @@ pub enum CliHookAddCommands {
         name: String,
         #[arg(short, long, value_name = "DESCRIPTION")]
         description: Option<String>,
-        #[arg(short, long, value_name = "SCRIPT_URL")]
+        #[arg(short = 'u', long, value_name = "URL")]
         script_url: String,
-        #[arg(short, long, value_name = "SCRIPT_FILENAME")]
+        #[arg(short = 'f', long, value_name = "FILENAME")]
         script_filename: String,
         #[arg(short, long, value_name = "EXECUTOR")]
         executor: String,

@@ -26,6 +26,7 @@ pub trait FilesystemController {
         let hooks_by_stage = self.get_config().hooks.iter().fold(
             vec![
                 HookStage::PreCommit,
+                HookStage::PrepareCommitMsg,
                 HookStage::CommitMsg,
                 HookStage::PostCommit,
                 HookStage::PrePush,
@@ -49,16 +50,32 @@ pub trait FilesystemController {
             let hook_content = hooks
                 .iter()
                 .map(|hook| {
+                    let executor = match hook {
+                        Hook::LocalHook(local_hook) => local_hook.executor.to_owned(),
+                        Hook::RemoteHook(remote_hook) => remote_hook.executor.to_owned()
+                    };
+
                     // TODO: switch to use defined script paths option. throw error if script DNE in any of the paths
-                    return match hook {
+                    let hook_script_command = match hook {
                         Hook::LocalHook(local_hook) => self.caci_scripts_directory().join(local_hook.name.as_str()),
                         Hook::RemoteHook(remote_hook) => self.caci_scripts_directory().join(remote_hook.name.as_str())
                     }
                     .to_string_lossy()
                     .to_string();
+
+                    return format!("{} {}", executor, hook_script_command);
                 })
                 .collect::<Vec<String>>()
                 .join("\n");
+
+            println!(
+                "Writing hook content: {} to {}",
+                hook_content,
+                self.repo_vcs_hooks_directory()
+                    .join(stage.to_vcs_stage_name())
+                    .to_string_lossy()
+                    .to_string()
+            );
 
             fs::write(
                 self.repo_vcs_hooks_directory()

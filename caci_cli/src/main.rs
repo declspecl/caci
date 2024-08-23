@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf};
+use std::fs;
 
 use caci_core::{
     model::{CaciConfig, Hook, HookOutput, HookStage, LocalHook, RemoteHook, VcsAgent},
@@ -11,77 +11,56 @@ use cli::{CaciCli, CliCommands, CliHookAddCommands, CliHookCommands, CliVcsAgent
 pub mod cli;
 
 fn main() -> CaciResult<()> {
+    let cwd = std::env::current_dir()?;
+
     let args = CaciCli::parse();
 
     let mut caci_fs_controller: Box<dyn FilesystemController> = match &args.command {
         CliCommands::New { project_name, agent } => {
             let caci_config = CaciConfig::from_vcs_agent(agent.clone().into());
 
-            let repo_base_directory = PathBuf::from(project_name);
+            let repo_base_directory = cwd.join(project_name);
 
             match agent {
-                CliVcsAgent::Git => Box::new(
-                    GitFilesystemController::new(
-                        repo_base_directory,
-                        caci_config
-                    )
-                ),
-                CliVcsAgent::Native => Box::new(
-                    NativeFilesystemController::new(
-                        repo_base_directory,
-                        caci_config
-                    )
-                )
+                CliVcsAgent::Git => Box::new(GitFilesystemController::new(
+                    repo_base_directory,
+                    caci_config
+                )),
+                CliVcsAgent::Native => Box::new(NativeFilesystemController::new(
+                    repo_base_directory,
+                    caci_config
+                ))
             }
         },
         CliCommands::Init { agent } => {
             let caci_config = CaciConfig::from_vcs_agent(agent.clone().into());
-            let repo_base_directory = PathBuf::new();
+            let repo_base_directory = cwd;
 
             match agent {
-                CliVcsAgent::Git => Box::new(
-                    GitFilesystemController::new(
-                        repo_base_directory,
-                        caci_config
-                    )
-                ),
-                CliVcsAgent::Native => Box::new(
-                    NativeFilesystemController::new(
-                        repo_base_directory,
-                        caci_config
-                    )
-                )
+                CliVcsAgent::Git => Box::new(GitFilesystemController::new(
+                    repo_base_directory,
+                    caci_config
+                )),
+                CliVcsAgent::Native => Box::new(NativeFilesystemController::new(
+                    repo_base_directory,
+                    caci_config
+                ))
             }
         },
         _ => {
-            let caci_config = match CaciConfig::try_deserialize(&fs::read_to_string(
-                "caci.toml"
-            )?) {
-                Ok(config) => config,
-                Err(_) => CaciConfig::default()
-            };
+            let caci_config = CaciConfig::try_deserialize(&fs::read_to_string("caci.toml")?)?;
+
+            let repo_base_directory = cwd;
 
             match caci_config.vcs_agent {
-                VcsAgent::Git => {
-                    let repo_base_directory = PathBuf::from(".");
-
-                    Box::new(
-                        GitFilesystemController::new(
-                            repo_base_directory,
-                            caci_config
-                        )
-                    )
-                },
-                VcsAgent::Native => {
-                    let repo_base_directory = PathBuf::from(".");
-
-                    Box::new(
-                        NativeFilesystemController::new(
-                            repo_base_directory,
-                            caci_config
-                        )
-                    )
-                }
+                VcsAgent::Git => Box::new(GitFilesystemController::new(
+                    repo_base_directory,
+                    caci_config
+                )),
+                VcsAgent::Native => Box::new(NativeFilesystemController::new(
+                    repo_base_directory,
+                    caci_config
+                ))
             }
         }
     };
@@ -126,9 +105,13 @@ fn main() -> CaciResult<()> {
                         output
                     );
 
-                    caci_fs_controller.get_mut_config().hooks.push(Hook::LocalHook(
-                        new_hook
-                    ));
+                    caci_fs_controller
+                        .get_mut_config()
+                        .hooks
+                        .push(Hook::LocalHook(new_hook));
+
+                    caci_fs_controller.write_config()?;
+                    caci_fs_controller.write_hooks()?;
                 },
                 CliHookAddCommands::Remote {
                     name,
@@ -152,9 +135,13 @@ fn main() -> CaciResult<()> {
                         output
                     );
 
-                    caci_fs_controller.get_mut_config().hooks.push(Hook::RemoteHook(
-                        new_hook
-                    ));
+                    caci_fs_controller
+                        .get_mut_config()
+                        .hooks
+                        .push(Hook::RemoteHook(new_hook));
+
+                    caci_fs_controller.write_config()?;
+                    caci_fs_controller.write_hooks()?;
                 }
             },
             CliHookCommands::Remove { name: _ } => {
@@ -165,8 +152,6 @@ fn main() -> CaciResult<()> {
             }
         }
     }
-
-    caci_fs_controller.write_config()?;
 
     return Ok(());
 }
