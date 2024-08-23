@@ -29,28 +29,7 @@ pub trait FilesystemController {
     }
 
     fn write_hooks(&self) -> CaciResult<()> {
-        let hooks_by_stage = self.get_config().hooks.iter().fold(
-            vec![
-                HookStage::PreCommit,
-                HookStage::PrepareCommitMsg,
-                HookStage::CommitMsg,
-                HookStage::PostCommit,
-                HookStage::PrePush,
-            ]
-            .into_iter()
-            .map(|stage| (stage, Vec::new()))
-            .collect::<HashMap<HookStage, Vec<Hook>>>(),
-            |mut acc, hook| {
-                let hook_stage = match hook {
-                    Hook::LocalHook(local_hook) => local_hook.stage,
-                    Hook::RemoteHook(remote_hook) => remote_hook.stage
-                };
-
-                acc.get_mut(&hook_stage).unwrap().push(hook.to_owned());
-
-                return acc;
-            }
-        );
+        let hooks_by_stage = self.get_config().get_hooks_by_stage();
 
         for (stage, hooks) in hooks_by_stage.iter() {
             let hook_content = hooks

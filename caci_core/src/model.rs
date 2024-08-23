@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{collections::HashMap, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
 
@@ -158,6 +158,31 @@ impl CaciConfig {
 
     pub fn try_deserialize(config_content: &str) -> CaciResult<CaciConfig> {
         return Ok(toml_edit::de::from_str(config_content)?);
+    }
+
+    pub fn get_hooks_by_stage(&self) -> HashMap<HookStage, Vec<Hook>> {
+        return self.hooks.iter().fold(
+            vec![
+                HookStage::PreCommit,
+                HookStage::PrepareCommitMsg,
+                HookStage::CommitMsg,
+                HookStage::PostCommit,
+                HookStage::PrePush,
+            ]
+            .into_iter()
+            .map(|stage| (stage, Vec::new()))
+            .collect::<HashMap<HookStage, Vec<Hook>>>(),
+            |mut acc, hook| {
+                let hook_stage = match hook {
+                    Hook::LocalHook(local_hook) => local_hook.stage,
+                    Hook::RemoteHook(remote_hook) => remote_hook.stage
+                };
+
+                acc.get_mut(&hook_stage).unwrap().push(hook.to_owned());
+
+                return acc;
+            }
+        );
     }
 }
 
