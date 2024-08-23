@@ -2,7 +2,6 @@ pub mod git;
 pub mod native;
 
 use std::{
-    collections::HashMap,
     fs::{self, File, Permissions},
     io::Write,
     os::unix::fs::PermissionsExt,
@@ -10,7 +9,7 @@ use std::{
 };
 
 use caci_core::{
-    model::{CaciConfig, Hook, HookStage},
+    model::{CaciConfig, Hook},
     CaciResult
 };
 

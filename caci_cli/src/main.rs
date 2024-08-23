@@ -1,8 +1,8 @@
-use std::fs;
+use std::{fs, process::Command};
 
 use caci_core::{
     model::{CaciConfig, Hook, HookOutput, HookStage, LocalHook, RemoteHook, VcsAgent},
-    CaciResult
+    CaciError, CaciResult
 };
 use caci_fs::{git::GitFilesystemController, native::NativeFilesystemController, FilesystemController};
 use clap::Parser;
@@ -148,8 +148,38 @@ fn main() -> CaciResult<()> {
             CliHookCommands::Remove { name: _ } => {
                 unimplemented!();
             },
-            CliHookCommands::Run { stage: _ } => {
-                unimplemented!();
+            CliHookCommands::Run { stage } => {
+                let stage = stage.into();
+                let hooks_by_stage = caci_fs_controller.get_config().get_hooks_by_stage();
+
+                let target_hooks = hooks_by_stage.get(&stage).ok_or(CaciError::UnknownHookStage(
+                    stage.to_vcs_stage_name()
+                ))?;
+
+                for hook in target_hooks.into_iter() {
+                    let executor = match hook {
+                        Hook::LocalHook(local_hook) => local_hook.executor.clone(),
+                        Hook::RemoteHook(remote_hook) => remote_hook.executor.clone()
+                    };
+
+                    let hook_script_command = match hook {
+                        Hook::LocalHook(local_hook) => caci_fs_controller
+                            .caci_scripts_directory()
+                            .join(local_hook.script_filename.as_str()),
+                        Hook::RemoteHook(remote_hook) => caci_fs_controller
+                            .caci_scripts_directory()
+                            .join(remote_hook.script_filename.as_str())
+                    };
+
+                    println!(
+                        "Running hook: {}",
+                        hook_script_command.to_string_lossy()
+                    );
+
+                    let mut child = Command::new(executor).arg(hook_script_command).spawn()?;
+
+                    child.wait()?;
+                }
             }
         }
     }

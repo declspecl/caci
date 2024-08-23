@@ -53,10 +53,7 @@ pub enum CliHookCommands {
         name: String
     },
     /// Executes a set of hooks by their hook stage
-    Run {
-        #[arg(short, long, value_name = "STAGE")]
-        stage: CliHookStage
-    }
+    Run { stage: CliHookStage }
 }
 
 #[derive(Debug, Clone, Copy, ValueEnum)]

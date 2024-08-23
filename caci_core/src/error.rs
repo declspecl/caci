@@ -10,7 +10,10 @@ pub enum CaciError {
     TOMLSerializationError(#[from] toml_edit::ser::Error),
 
     #[error("ReqwestError: {0}")]
-    ReqwestError(#[from] reqwest::Error)
+    ReqwestError(#[from] reqwest::Error),
+
+    #[error("Unknown hook stage: {0}")]
+    UnknownHookStage(String)
 }
 
 pub type CaciResult<T> = anyhow::Result<T, CaciError>;
