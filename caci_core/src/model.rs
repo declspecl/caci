@@ -4,14 +4,14 @@ use serde::{Deserialize, Serialize};
 
 use crate::CaciResult;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum VcsAgent {
     Native,
     Git
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum HookOutput {
     Stdout,
@@ -19,7 +19,7 @@ pub enum HookOutput {
     Silent
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum HookStage {
     PreCommit,
@@ -27,6 +27,18 @@ pub enum HookStage {
     CommitMsg,
     PostCommit,
     PrePush
+}
+
+impl HookStage {
+    pub fn to_vcs_stage_name(&self) -> String {
+        return match self {
+            HookStage::PreCommit => "pre-commit".to_string(),
+            HookStage::PrepareCommitMsg => "prepare-commit-msg".to_string(),
+            HookStage::CommitMsg => "commit-msg".to_string(),
+            HookStage::PostCommit => "post-commit".to_string(),
+            HookStage::PrePush => "pre-push".to_string()
+        };
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
