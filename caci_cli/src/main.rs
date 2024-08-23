@@ -81,7 +81,8 @@ fn main() -> CaciResult<()> {
             // caci_fs_controller.clean_remote_scripts()?;
         },
         CliCommands::Write => {
-            unimplemented!();
+            caci_fs_controller.write_config()?;
+            caci_fs_controller.write_hooks()?;
         },
         CliCommands::Hook(hook_command) => match hook_command {
             CliHookCommands::Add(hook_add_command) => match hook_add_command {
