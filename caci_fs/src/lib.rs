@@ -1,7 +1,13 @@
 pub mod git;
 pub mod native;
 
-use std::{collections::HashMap, fs, path::PathBuf};
+use std::{
+    collections::HashMap,
+    fs::{self, File, Permissions},
+    io::Write,
+    os::unix::fs::PermissionsExt,
+    path::PathBuf
+};
 
 use caci_core::{
     model::{CaciConfig, Hook, HookStage},
@@ -77,12 +83,13 @@ pub trait FilesystemController {
                     .to_string()
             );
 
-            fs::write(
+            let mut hook_file = File::create(
                 self.repo_vcs_hooks_directory()
                     .join(stage.to_vcs_stage_name())
-                    .as_path(),
-                hook_content.as_bytes()
+                    .as_path()
             )?;
+            hook_file.set_permissions(Permissions::from_mode(0o755))?;
+            hook_file.write_all(hook_content.as_bytes())?;
         }
 
         return Ok(());

@@ -1,3 +1,16 @@
 vcs-agent = "git"
 script-paths = [".caci/scripts"]
-hooks = []
+
+[[hooks]]
+name = "format"
+script-filename = "format"
+executor = "/bin/sh"
+stage = "pre-commit"
+output = "stdout"
+
+[[hooks]]
+name = "test"
+script-filename = "test"
+executor = "/bin/sh"
+stage = "pre-push"
+output = "stdout"
