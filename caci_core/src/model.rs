@@ -15,7 +15,7 @@ pub enum VcsAgent {
 #[serde(rename_all = "kebab-case")]
 pub enum HookOutput {
     Stdout,
-    Commit,
+    CommitMsg,
     Silent
 }
 
@@ -34,7 +34,8 @@ pub enum HookStage {
 pub struct LocalHook {
     pub name: String,
     pub description: Option<String>,
-    pub command: String,
+    pub script_filename: String,
+    pub executor: String,
     pub stage: HookStage,
     pub output: HookOutput
 }
@@ -43,14 +44,16 @@ impl LocalHook {
     pub fn new(
         name: String,
         description: Option<String>,
-        command: String,
+        script_filename: String,
+        executor: String,
         stage: HookStage,
         output: HookOutput
     ) -> LocalHook {
         return LocalHook {
             name,
             description,
-            command,
+            script_filename,
+            executor,
             stage,
             output
         };
@@ -62,8 +65,9 @@ impl LocalHook {
 pub struct RemoteHook {
     pub name: String,
     pub description: Option<String>,
-    pub hook_url: String,
-    pub hook_executor: String,
+    pub script_url: String,
+    pub script_filename: String,
+    pub executor: String,
     pub stage: HookStage,
     pub output: HookOutput
 }
@@ -72,16 +76,18 @@ impl RemoteHook {
     pub fn new(
         name: String,
         description: Option<String>,
-        hook_url: String,
-        hook_executor: String,
+        script_url: String,
+        script_filename: String,
+        executor: String,
         stage: HookStage,
         output: HookOutput
     ) -> RemoteHook {
         return RemoteHook {
             name,
             description,
-            hook_url,
-            hook_executor,
+            script_url,
+            script_filename,
+            executor,
             stage,
             output
         };
@@ -104,7 +110,10 @@ pub struct CaciConfig {
 }
 
 impl CaciConfig {
-    pub fn new(vcs_agent: VcsAgent, script_paths: Vec<PathBuf>) -> CaciConfig {
+    pub fn new(
+        vcs_agent: VcsAgent,
+        script_paths: Vec<PathBuf>
+    ) -> CaciConfig {
         return CaciConfig {
             vcs_agent,
             script_paths,
@@ -142,6 +151,9 @@ impl CaciConfig {
 
 impl Default for CaciConfig {
     fn default() -> Self {
-        return Self::new(VcsAgent::Native, vec![PathBuf::from("./caci/scripts")]);
+        return Self::new(
+            VcsAgent::Native,
+            vec![PathBuf::from(".caci/scripts")]
+        );
     }
 }

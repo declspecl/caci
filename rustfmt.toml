@@ -1,3 +1,6 @@
 trailing_comma = "Never"
 match_block_trailing_comma = true
 brace_style = "SameLineWhere"
+max_width = 120
+fn_params_layout = "Vertical"
+fn_call_width = 20

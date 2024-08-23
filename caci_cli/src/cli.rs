@@ -52,10 +52,10 @@ pub enum CliHookCommands {
         #[arg(short, long, value_name = "NAME")]
         name: String
     },
-    /// Executes an arbitrary hook by name
+    /// Executes a set of hooks by their hook stage
     Run {
-        #[arg(short, long, value_name = "NAME")]
-        name: String
+        #[arg(short, long, value_name = "STAGE")]
+        stage: CliHookStage
     }
 }
 
@@ -91,7 +91,7 @@ impl Into<HookOutput> for CliHookOutput {
     fn into(self) -> HookOutput {
         return match self {
             CliHookOutput::Stdout => HookOutput::Stdout,
-            CliHookOutput::Commit => HookOutput::Commit,
+            CliHookOutput::Commit => HookOutput::CommitMsg,
             CliHookOutput::Silent => HookOutput::Silent
         };
     }
@@ -105,8 +105,10 @@ pub enum CliHookAddCommands {
         name: String,
         #[arg(short, long, value_name = "DESCRIPTION")]
         description: Option<String>,
-        #[arg(short, long, value_name = "COMMAND")]
-        command: String,
+        #[arg(short, long, value_name = "SCRIPT_FILENAME")]
+        script_filename: String,
+        #[arg(short, long, value_name = "EXECUTOR")]
+        executor: String,
         #[arg(short, long, value_name = "STAGE")]
         stage: CliHookStage,
         #[arg(short, long, value_name = "OUTPUT", default_value = "stdout")]
@@ -118,10 +120,12 @@ pub enum CliHookAddCommands {
         name: String,
         #[arg(short, long, value_name = "DESCRIPTION")]
         description: Option<String>,
-        #[arg(short, long, value_name = "HOOK_URL")]
-        hook_url: String,
-        #[arg(short, long, value_name = "HOOK_EXECUTOR")]
-        hook_executor: String,
+        #[arg(short, long, value_name = "SCRIPT_URL")]
+        script_url: String,
+        #[arg(short, long, value_name = "SCRIPT_FILENAME")]
+        script_filename: String,
+        #[arg(short, long, value_name = "EXECUTOR")]
+        executor: String,
         #[arg(short, long, value_name = "STAGE")]
         stage: CliHookStage,
         #[arg(short, long, value_name = "OUTPUT", default_value = "stdout")]

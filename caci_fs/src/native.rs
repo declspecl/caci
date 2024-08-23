@@ -10,7 +10,10 @@ pub struct NativeFilesystemController {
 }
 
 impl NativeFilesystemController {
-    pub fn new(repo_base_directory: PathBuf, config: CaciConfig) -> Self {
+    pub fn new(
+        repo_base_directory: PathBuf,
+        config: CaciConfig
+    ) -> Self {
         return Self {
             repo_base_directory,
             config
