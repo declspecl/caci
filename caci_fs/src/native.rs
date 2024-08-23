@@ -48,10 +48,6 @@ impl FilesystemController for NativeFilesystemController {
         return Ok(());
     }
 
-    fn write_scripts(&self) -> CaciResult<()> {
-        unimplemented!();
-    }
-
     fn write_hooks(&self) -> CaciResult<()> {
         unimplemented!();
     }

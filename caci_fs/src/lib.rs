@@ -1,9 +1,12 @@
 pub mod git;
 pub mod native;
 
-use std::{fs, path::PathBuf};
+use std::{collections::HashMap, fs, path::PathBuf};
 
-use caci_core::{model::CaciConfig, CaciResult};
+use caci_core::{
+    model::{CaciConfig, Hook, HookStage},
+    CaciResult
+};
 
 pub trait FilesystemController {
     fn get_config(&self) -> &CaciConfig;
@@ -19,8 +22,55 @@ pub trait FilesystemController {
         return self.caci_directory().join("scripts");
     }
 
-    fn write_scripts(&self) -> CaciResult<()>;
-    fn write_hooks(&self) -> CaciResult<()>;
+    fn write_hooks(&self) -> CaciResult<()> {
+        let hooks_by_stage = self.get_config().hooks.iter().fold(
+            vec![
+                HookStage::PreCommit,
+                HookStage::CommitMsg,
+                HookStage::PostCommit,
+                HookStage::PrePush,
+            ]
+            .into_iter()
+            .map(|stage| (stage, Vec::new()))
+            .collect::<HashMap<HookStage, Vec<Hook>>>(),
+            |mut acc, hook| {
+                let hook_stage = match hook {
+                    Hook::LocalHook(local_hook) => local_hook.stage,
+                    Hook::RemoteHook(remote_hook) => remote_hook.stage
+                };
+
+                acc.get_mut(&hook_stage).unwrap().push(hook.to_owned());
+
+                return acc;
+            }
+        );
+
+        for (stage, hooks) in hooks_by_stage.iter() {
+            let hook_content = hooks
+                .iter()
+                .map(|hook| {
+                    // TODO: switch to use defined script paths option. throw error if script DNE in any of the paths
+                    return match hook {
+                        Hook::LocalHook(local_hook) => self.caci_scripts_directory().join(local_hook.name.as_str()),
+                        Hook::RemoteHook(remote_hook) => self.caci_scripts_directory().join(remote_hook.name.as_str())
+                    }
+                    .to_string_lossy()
+                    .to_string();
+                })
+                .collect::<Vec<String>>()
+                .join("\n");
+
+            fs::write(
+                self.repo_vcs_hooks_directory()
+                    .join(stage.to_vcs_stage_name())
+                    .as_path(),
+                hook_content.as_bytes()
+            )?;
+        }
+
+        return Ok(());
+    }
+
     fn write_config(&self) -> CaciResult<()> {
         fs::write(
             self.repo_base_directory().join("caci.toml").as_path(),
@@ -36,12 +86,12 @@ pub trait FilesystemController {
         return Ok(());
     }
     fn initialize_vcs(&self) -> CaciResult<()>;
-    fn initalize(&self) -> CaciResult<()> {
+    fn initalize_all(&self) -> CaciResult<()> {
         self.initialize_caci()?;
         self.initialize_vcs()?;
         self.write_config()?;
+        self.download_remote_hooks()?;
         self.write_hooks()?;
-        self.write_scripts()?;
 
         return Ok(());
     }
@@ -52,9 +102,20 @@ pub trait FilesystemController {
 
         return Ok(());
     }
-    fn clean_scripts(&self) -> CaciResult<()> {
-        fs::remove_dir_all(self.caci_scripts_directory().as_path())?;
-        fs::create_dir_all(self.caci_scripts_directory().as_path())?;
+
+    fn download_remote_hooks(&self) -> CaciResult<()> {
+        for hook in self.get_config().hooks.iter() {
+            if let Hook::RemoteHook(remote_hook) = hook {
+                let hook_script_content = reqwest::blocking::get(remote_hook.script_url.as_str())?.text()?;
+
+                fs::write(
+                    self.repo_vcs_hooks_directory()
+                        .join(remote_hook.name.as_str())
+                        .as_path(),
+                    hook_script_content.as_bytes()
+                )?;
+            }
+        }
 
         return Ok(());
     }

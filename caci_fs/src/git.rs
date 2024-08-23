@@ -42,10 +42,6 @@ impl FilesystemController for GitFilesystemController {
         return self.repo_vcs_directory().join("hooks");
     }
 
-    fn write_scripts(&self) -> CaciResult<()> {
-        unimplemented!();
-    }
-
     fn write_hooks(&self) -> CaciResult<()> {
         unimplemented!();
     }

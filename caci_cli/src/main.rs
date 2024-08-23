@@ -91,14 +91,15 @@ fn main() -> CaciResult<()> {
             project_name: _,
             agent: _
         } => {
-            caci_fs_controller.initalize()?;
+            caci_fs_controller.initalize_all()?;
         },
         CliCommands::Init { agent: _ } => {
-            caci_fs_controller.initalize()?;
+            caci_fs_controller.initalize_all()?;
         },
         CliCommands::Clean => {
             caci_fs_controller.clean_hooks()?;
-            caci_fs_controller.clean_scripts()?;
+            // TODO: look into if this is a good feature
+            // caci_fs_controller.clean_remote_scripts()?;
         },
         CliCommands::Write => {
             unimplemented!();
