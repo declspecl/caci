@@ -1,4 +1,4 @@
-use caci_core::model::{HookOutput, HookStage, VcsAgent};
+use crate::config::{HookOutput, HookStage, VcsAgent};
 use clap::{Parser, Subcommand, ValueEnum};
 
 #[derive(Debug, Parser)]

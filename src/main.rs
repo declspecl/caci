@@ -1,14 +1,15 @@
 use std::{fs, process::Command};
 
-use caci_core::{
-    model::{CaciConfig, Hook, HookOutput, HookStage, LocalHook, RemoteHook, VcsAgent},
-    CaciError, CaciResult
-};
-use caci_fs::{git::GitFilesystemController, native::NativeFilesystemController, FilesystemController};
+use error::{CaciError, CaciResult};
+use config::{CaciConfig, Hook, HookOutput, HookStage, LocalHook, RemoteHook, VcsAgent};
+use agent::{git::GitFilesystemController, native::NativeFilesystemController, FilesystemController};
 use clap::Parser;
 use cli::{CaciCli, CliCommands, CliHookAddCommands, CliHookCommands, CliVcsAgent};
 
 pub mod cli;
+pub mod error;
+pub mod agent;
+pub mod config;
 
 fn main() -> CaciResult<()> {
     let cwd = std::env::current_dir()?;

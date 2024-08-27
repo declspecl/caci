@@ -2,16 +2,17 @@ pub mod git;
 pub mod native;
 
 use std::{
-    fs::{self, File, Permissions},
+    fs::{self, File},
     io::Write,
-    os::unix::fs::PermissionsExt,
     path::PathBuf
 };
 
-use caci_core::{
-    model::{CaciConfig, Hook},
-    CaciResult
-};
+#[cfg(not(target_os = "windows"))]
+use std::fs::Permissions;
+#[cfg(not(target_os = "windows"))]
+use std::os::unix::fs::PermissionsExt;
+
+use crate::{config::{CaciConfig, Hook}, error::CaciResult};
 
 pub trait FilesystemController {
     fn get_config(&self) -> &CaciConfig;
@@ -66,7 +67,10 @@ pub trait FilesystemController {
                     .join(stage.to_vcs_stage_name())
                     .as_path()
             )?;
+            
+            #[cfg(not(target_os = "windows"))]
             hook_file.set_permissions(Permissions::from_mode(0o755))?;
+
             hook_file.write_all(hook_content.as_bytes())?;
         }
 

@@ -1,8 +1,6 @@
 use std::{fs, path::PathBuf};
 
-use caci_core::{model::CaciConfig, CaciResult};
-
-use crate::FilesystemController;
+use crate::{config::CaciConfig, error::CaciResult, FilesystemController};
 
 pub struct NativeFilesystemController {
     repo_base_directory: PathBuf,
