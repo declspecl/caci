@@ -38,6 +38,10 @@ Now your CI pipeline is ready to go!
 - Much more
 
 ## Features
+- [x] TOML configuration
+- [ ] CLI configuration interface (WIP)
+- [ ] Custom script executors and hook output piping
+- [ ] `caci` subdirectories
 
 ### Supported Version Control Systems
 - [x] Native (None)
